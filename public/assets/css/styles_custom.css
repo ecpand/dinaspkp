@@ -1,0 +1,174 @@
+/*.content-wrapper{
+  background :url(../images/background.png) no-repeat ;
+}
+
+.main-panel{
+  background :url(../images/background.jpg) no-repeat ;
+  background-size: cover;
+}*/
+
+label#sumtot {
+  font-size: 50px;
+}
+
+.btnadd{
+  background :url(../img/add.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.btnupdate{
+  background :url(../img/update.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.btndelete{
+  background :url(../img/delete.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.btndetails{
+  background :url(../img/details.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.btnconfirm{
+  background :url(../img/confirm.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.btnprint{
+  background :url(../img/print.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.btnfuelcons{
+  background :url(../img/fuelcons.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btnsend{
+  background :url(../img/send.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btnstart{
+  background :url(../img/mulai.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btncastoff{
+  background :url(../img/tugboat.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btninpost{
+  background :url(../img/inpost.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btnrefresh{
+  background :url(../img/refresh.png) no-repeat ;
+  background-position: center;
+  float:right;
+  border : none;
+  cursor:pointer;
+  min-width: 18px;
+  min-height: 18px;
+}
+
+.btnproses{
+  background :url(../img/proses.png) no-repeat ;
+  background-position: center;
+  float:left;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btnexcel{
+  background :url(../img/excel.png) no-repeat ;
+  background-position: center;
+  float:left;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.btnpdf{
+  background :url(../img/pdf.png) no-repeat ;
+  background-position: center;
+  float:left;
+  border : none;
+  cursor:pointer;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.table td {
+    padding: 0.2rem;
+}
+
+.sidebar .nav .nav-item .nav-link{
+  white-space: normal;
+}
+
+.content-media{
+  margin : 40px 40px 0px 40px;
+}

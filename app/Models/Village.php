@@ -1,0 +1,1 @@
+<?php namespace App\Models; use Illuminate\Database\Eloquent\Model; class Village extends Model { protected $guarded=[]; public function regency(){return $this->belongsTo(Regency::class);} public function recipients(){return $this->hasMany(MbbrRecipient::class);} }

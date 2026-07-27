@@ -1,0 +1,1 @@
+<?php namespace App\Http\Middleware; use Closure; use Illuminate\Http\Request; class ConsoleAuth { public function handle(Request $r,Closure $next){return $r->session()->has('console_user')?$next($r):redirect('/console/login');}}

@@ -1,0 +1,1 @@
+<?php namespace App\Models; use Illuminate\Database\Eloquent\Model; class WebsiteSetting extends Model { protected $guarded=[]; protected function casts(): array{return ['social_links'=>'array','profile_milestones'=>'array','service_scopes'=>'array','duty_functions'=>'array'];}}

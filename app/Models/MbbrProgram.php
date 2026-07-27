@@ -1,0 +1,1 @@
+<?php namespace App\Models; use Illuminate\Database\Eloquent\Model; class MbbrProgram extends Model { protected $guarded=[]; protected function casts():array{return ['budget'=>'decimal:2'];} public function recipients(){return $this->hasMany(MbbrRecipient::class);} public function type(){return $this->belongsTo(MbbrProgramType::class,'mbbr_program_type_id');}}
