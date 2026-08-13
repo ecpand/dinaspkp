@@ -30,6 +30,7 @@ class WebManagementController extends Controller
             'instagram' => 'nullable|url|max:255',
             'youtube' => 'nullable|url|max:255',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'favicon' => 'nullable|file|mimes:ico,png|max:1024',
         ]);
 
         $data['social_links'] = array_filter([
@@ -39,13 +40,16 @@ class WebManagementController extends Controller
         ]);
         unset($data['facebook'], $data['instagram'], $data['youtube']);
 
-        if ($request->hasFile('logo')) {
-            if ($setting?->logo_path) {
-                Storage::disk('public')->delete($setting->logo_path);
+        foreach (['logo' => 'logo_path', 'favicon' => 'favicon_path'] as $input => $column) {
+            if (!$request->hasFile($input)) {
+                continue;
             }
-            $data['logo_path'] = $request->file('logo')->store('website', 'public');
+            if ($setting?->{$column}) {
+                Storage::disk('public')->delete($setting->{$column});
+            }
+            $data[$column] = $request->file($input)->store('website', 'public');
         }
-        unset($data['logo']);
+        unset($data['logo'], $data['favicon']);
 
         WebsiteSetting::updateOrCreate(['id' => 1], $data);
 

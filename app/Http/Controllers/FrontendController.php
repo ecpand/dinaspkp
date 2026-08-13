@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\{Agenda,Document,Gallery,MbbrArea,MbbrProgram,MbbrRecipient,MbbrProgramType,Post,ProvincialLeader,Regency,ServiceReview,StructuralOfficial,VisitorSession,WebsiteSetting,WelcomeSlide,Village};
+use App\Models\{Agenda,Document,Gallery,MbbrArea,MbbrProgram,MbbrRecipient,MbbrProgramType,PkpService,Post,ProposalData,ProvincialLeader,Regency,RlthRecord,ServiceReview,StructuralOfficial,VisitorSession,WebsiteSetting,WelcomeSlide,Village};
 use Illuminate\Http\Request;
 
 class FrontendController extends Controller
@@ -63,12 +63,78 @@ class FrontendController extends Controller
                 'programCompleted' => $allPrograms->where('status', 'completed')->count(), 'recipientTotal' => $allPrograms->sum('recipients_count'),
             ]);
         }
+        if ($page === 'layanan-pkp') {
+            return view('frontend.pages.services.pkp', $data + [
+                'title' => 'Layanan PKP',
+                'activeProgramTypes' => MbbrProgramType::withCount('programs')->orderBy('name')->get(),
+                'pkpServices' => PkpService::where('is_active', true)->orderBy('sort_order')->latest('id')->get(),
+            ]);
+        }
+        if ($page === 'pendataan-rlth') {
+            $allRlth = RlthRecord::query();
+            $filteredRlth = (clone $allRlth)->latest()->get();
+            return view('frontend.pages.services.rlth', $data + [
+                'title' => 'Pendataan RLTH',
+                'rlthTotal' => $allRlth->count(),
+                'rlthRegencies' => (clone $allRlth)->whereNotNull('regency_name')->distinct()->count('regency_name'),
+                'rlthRecords' => $filteredRlth,
+                'rlthYears' => (clone $allRlth)->whereNotNull('survey_year')->distinct()->orderByDesc('survey_year')->pluck('survey_year'),
+                'rlthRegencyOptions' => (clone $allRlth)->whereNotNull('regency_name')->distinct()->orderBy('regency_name')->pluck('regency_name'),
+                'rlthVillageOptions' => (clone $allRlth)->whereNotNull('village_name')->distinct()->orderBy('village_name')->pluck('village_name'),
+                'rlthMapItems' => $filteredRlth->filter(fn ($record) => $record->latitude && $record->longitude)->map(fn ($record) => [
+                    'id' => $record->id, 'name' => $record->name, 'lat' => (float) $record->latitude, 'lng' => (float) $record->longitude,
+                    'village' => $record->village_name, 'regency' => $record->regency_name, 'condition' => $record->roof_damage_level,
+                    'detail' => [
+                        'name' => $record->name, 'year' => $record->survey_year,
+                        'national_id' => $record->national_id ? str_repeat('*', max(0, strlen($record->national_id) - 4)).substr($record->national_id, -4) : null,
+                        'family_card_number' => $record->family_card_number ? str_repeat('*', max(0, strlen($record->family_card_number) - 4)).substr($record->family_card_number, -4) : null,
+                        'phone' => $record->phone ? str_repeat('*', max(0, strlen($record->phone) - 4)).substr($record->phone, -4) : null,
+                        'address' => $record->address, 'village' => $record->village_name,
+                        'regency' => $record->regency_name, 'occupation' => $record->occupation, 'income' => $record->income_range,
+                        'house_ownership' => $record->house_ownership, 'land_ownership' => $record->land_ownership,
+                        'other_assets' => $record->other_assets, 'foundation' => $record->foundation_condition,
+                        'beam_column' => $record->beam_column_condition, 'windows' => $record->window_availability,
+                        'ventilation' => $record->ventilation_availability, 'mck' => $record->mck_availability,
+                        'water_source' => $record->water_source, 'wall_type' => $record->wall_type,
+                        'roof_material' => $record->roof_material, 'roof' => $record->roof_damage_level,
+                        'area' => $record->building_area, 'latitude' => $record->latitude, 'longitude' => $record->longitude,
+                        'photos' => array_filter([
+                            'Tampak depan' => $record->photoUrl('photo_front_path'), 'Samping kiri' => $record->photoUrl('photo_left_path'),
+                            'Samping kanan' => $record->photoUrl('photo_right_path'), 'Tampak belakang' => $record->photoUrl('photo_back_path'),
+                            'Atap bagian dalam' => $record->photoUrl('photo_roof_path'), 'Jendela' => $record->photoUrl('photo_window_path'), 'MCK' => $record->photoUrl('photo_mck_path'),
+                        ]),
+                    ],
+                ])->values(),
+            ]);
+        }
         if ($page === 'geomap') return view('frontend.pages.maps.index', $data + [
             'title' => 'GeoMAP MBBR',
             'villages' => Village::orderBy('name')->get(),
             'programTypes' => MbbrProgramType::orderBy('id')->get(),
             'mapAreas' => MbbrArea::with(['regency', 'village'])->orderBy('name')->get(),
         ]);
+        if ($page === 'data-usulan') {
+            $proposals = ProposalData::query()->latest()->get();
+            return view('frontend.pages.sigaprumabeta.proposals', $data + [
+                'title' => 'Data Usulan',
+                'proposals' => $proposals,
+                'proposalYears' => $proposals->pluck('proposal_year')->filter()->unique()->sortDesc()->values(),
+                'proposalRegencies' => $proposals->pluck('regency_name')->filter()->unique()->sort()->values(),
+                'proposalMapItems' => $proposals->filter(fn ($proposal) => $proposal->latitude && $proposal->longitude)->map(fn ($proposal) => [
+                    'id' => $proposal->id, 'lat' => (float) $proposal->latitude, 'lng' => (float) $proposal->longitude,
+                    'year' => $proposal->proposal_year, 'regency' => $proposal->regency_name, 'village' => $proposal->village_name,
+                ])->values(),
+            ]);
+        }
+        if (in_array($page, ['sadata-kp', 'sadata-psu', 'kawasan-kumuh'], true)) {
+            $sigaprumabetaPages = [
+                'data-usulan' => ['title' => 'Data Usulan', 'icon' => 'fa-file-circle-plus', 'description' => 'Pusat informasi usulan pembangunan perumahan dan kawasan permukiman Provinsi Maluku.'],
+                'sadata-kp' => ['title' => 'Sadata KP', 'icon' => 'fa-city', 'description' => 'Sistem data kawasan permukiman untuk mendukung perencanaan dan pengambilan kebijakan.'],
+                'sadata-psu' => ['title' => 'Sadata PSU', 'icon' => 'fa-road', 'description' => 'Sistem data prasarana, sarana, dan utilitas umum perumahan dan permukiman.'],
+                'kawasan-kumuh' => ['title' => 'Kawasan Kumuh', 'icon' => 'fa-layer-group', 'description' => 'Informasi kawasan kumuh untuk mendukung penanganan permukiman yang layak dan berkelanjutan.'],
+            ];
+            return view('frontend.pages.sigaprumabeta.index', $data + ['sigaprumabeta' => $sigaprumabetaPages[$page]]);
+        }
         if ($page === 'galeri') {
             $galleryItems = Gallery::where('is_active', true)->latest()->get();
             return view('frontend.pages.gallery.index', $data + [

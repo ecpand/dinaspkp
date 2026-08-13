@@ -27,12 +27,16 @@
             </div>
             <div class="col-lg-4">
                 <div class="rounded-3 bg-light border p-3 h-100">
-                    <h3 class="h6 text-primary fw-bold mb-3"><i class="fa fa-image me-2"></i>Logo Website</h3>
+                    <h3 class="h6 text-primary fw-bold mb-3"><i class="fa fa-image me-2"></i>Logo & Favicon</h3>
                     <div class="bg-white border rounded-3 d-flex align-items-center justify-content-center mb-3" style="height:155px">
                         <img id="logoPreview" src="{{ $setting?->logo_path ? asset('storage/'.$setting->logo_path) : asset('assets/img/logo.png') }}" alt="Preview logo" style="max-width:130px;max-height:130px;object-fit:contain">
                     </div>
                     <input type="file" name="logo" id="logoInput" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/*">
                     <small class="text-secondary d-block mt-2">JPG, PNG, atau WEBP. Maksimal 2 MB.</small>
+                    <hr class="my-3">
+                    <div class="d-flex align-items-center gap-3 mb-2"><img id="faviconPreview" src="{{ $setting?->favicon_path ? asset('storage/'.$setting->favicon_path) : asset('assets/img/logo.png') }}" alt="Preview favicon" style="width:34px;height:34px;object-fit:contain"><label class="form-label mb-0">Favicon Browser</label></div>
+                    <input type="file" name="favicon" id="faviconInput" class="form-control" accept=".ico,.png,image/x-icon,image/png">
+                    <small class="text-secondary d-block mt-2">ICO atau PNG. Disarankan ukuran 32×32 atau 48×48 px, maksimal 1 MB.</small>
                 </div>
             </div>
         </div>
@@ -59,6 +63,10 @@
 document.getElementById('logoInput')?.addEventListener('change', function () {
     const file = this.files?.[0];
     if (file) document.getElementById('logoPreview').src = URL.createObjectURL(file);
+});
+document.getElementById('faviconInput')?.addEventListener('change', function () {
+    const file = this.files?.[0];
+    if (file) document.getElementById('faviconPreview').src = URL.createObjectURL(file);
 });
 </script>
 

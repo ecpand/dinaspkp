@@ -6,6 +6,9 @@
 <p class="menu-label">PENGELOLAAN</p>
 <details><summary><i class="fa fa-globe"></i>Kelola WEB</summary><div class="sub-menu"><a href="/console/kelola-web/pengaturan-website">Website Setting</a><a href="/console/kelola-web/profil-dinas">Profil Dinas</a><a href="/console/kelola-web/visi-misi">Visi Misi</a><a href="/console/kelola-web/tugas-fungsi">Tugas dan Fungsi</a><a href="/console/kelola-web/struktur-organisasi">Struktur Organisasi</a><a href="/console/pejabat">Profil Pejabat</a></div></details>
 <a href="/console/slider-sambutan"><i class="fa fa-images"></i>Welcome Slide</a>
+<a href="/console/layanan-pkp"><i class="fa fa-handshake-angle"></i>Layanan PKP</a>
+<a href="/console/pendataan-rlth"><i class="fa fa-house-crack"></i>Pendataan RLTH</a>
+<a href="/console/data-usulan"><i class="fa fa-file-circle-plus"></i>Data Usulan</a>
 <a href="/console/berita"><i class="fa fa-newspaper"></i>Berita</a>
 <details><summary><i class="fa fa-house"></i>Program MBBR</summary><div class="sub-menu"><a href="/console/program-mbbr">Dashboard MBBR</a><a href="/console/program-mbbr/jenis">Jenis MBBR</a><a href="/console/program-mbbr/sub-program">Sub Program MBBR</a><a href="/console/program-mbbr/data-penerima">Data Penerima</a><a href="/console/program-mbbr/data-desa">Data Desa</a><a href="/console/program-mbbr/import-penerima">Import Penerima</a><a href="/console/program-mbbr/geojson-wilayah">GeoJSON Wilayah</a></div></details>
 <a href="/console/agenda"><i class="fa fa-calendar-days"></i>Agenda Kegiatan</a><a href="/console/ulasan-layanan"><i class="fa fa-star"></i>Ulasan Layanan</a><a href="/console/galeri"><i class="fa fa-photo-film"></i>Galeri</a><a href="/console/dokumen"><i class="fa fa-file-arrow-down"></i>Dokumen</a><a href="/console/users"><i class="fa fa-users"></i>Manajemen User</a><a href="/console/pimpinan"><i class="fa fa-user-tie"></i>Pimpinan Maluku</a>
