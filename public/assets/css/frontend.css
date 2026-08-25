@@ -86,7 +86,7 @@ body {
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     border-bottom: 1px solid rgba(181, 157, 114, 0.1);
-    margin-bottom:20px;
+    margin-bottom:0;
 }
 
 .navbar-nav .nav-link {
