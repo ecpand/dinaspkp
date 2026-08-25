@@ -77,8 +77,8 @@
 <main class="geomap-page">
     <div class="container">
         <header>
-            <h1 class="geomap-title"><i class="fas fa-map-marked-alt me-2 text-primary"></i>GEOMAP MBBR PROVINSI MALUKU</h1>
-            <p class="geomap-intro">Peta sebaran penerima bantuan, wilayah program, dan progres penanganan perumahan serta kawasan permukiman.</p>
+            <h1 class="geomap-title"><i class="fas fa-map-marked-alt me-2 text-primary"></i>SIGAProgram PKP Provinsi Maluku</h1>
+            <p class="geomap-intro">System Informasi Geospasial Program Perumahan Dan Kawasan Permukiman.</p>
         </header>
         <section class="geomap-shell">
             <div>
