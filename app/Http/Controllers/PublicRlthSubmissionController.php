@@ -37,6 +37,20 @@ class PublicRlthSubmissionController extends Controller
         ]);
     }
 
+    public function checkFamilyCard(Request $request)
+    {
+        $familyCardNumber = preg_replace('/\D+/', '', (string) $request->query('family_card_number'));
+        if (strlen($familyCardNumber) !== 16) {
+            return response()->json(['available' => false, 'message' => 'Nomor KK harus terdiri dari 16 digit.']);
+        }
+
+        $exists = RlthRecord::where('family_card_number', $familyCardNumber)->exists();
+        return response()->json([
+            'available' => !$exists,
+            'message' => $exists ? 'Nomor KK ini sudah terdaftar pada data RTLH.' : 'Nomor KK dapat digunakan.',
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->merge([

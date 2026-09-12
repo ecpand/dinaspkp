@@ -24,6 +24,7 @@ Route::post('/ulasan', [FrontendController::class, 'storeReview'])->name('review
 Route::get('/geomap-data', [FrontendController::class, 'mapData'])->name('geomap.data');
 Route::get('/berita/{slug}', [FrontendController::class, 'newsDetail'])->where('slug', '[a-z0-9-]+');
 Route::get('/form-pendataan-rtlh', [PublicRlthSubmissionController::class, 'create'])->name('public.rlth.create');
+Route::get('/form-pendataan-rtlh/check-kk', [PublicRlthSubmissionController::class, 'checkFamilyCard'])->name('public.rlth.check-family-card');
 Route::post('/form-pendataan-rtlh', [PublicRlthSubmissionController::class, 'store'])->name('public.rlth.store');
 Route::get('/{page}', [FrontendController::class, 'page'])->whereIn('page', ['profil-dinas','visi-misi','tugas-pokok-fungsi','struktur-organisasi','profil-pejabat','agenda-kegiatan','program-kegiatan','layanan-pkp','pendataan-rlth','data-usulan','sadata-kp','sadata-psu','kawasan-kumuh','berita','geomap','galeri','peraturan','informasi','unduhan','kontak']);
 Route::get('/console/login', [ConsoleController::class, 'login']);
