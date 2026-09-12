@@ -11,7 +11,16 @@
             'phone' => $record->phone ? str_repeat('*', max(0, strlen($record->phone) - 4)).substr($record->phone, -4) : null,
             'address' => $record->address,
             'village' => $record->village_name,
+            'province' => $record->province_name,
+            'district' => $record->district_name,
             'regency' => $record->regency_name,
+            'family_members' => $record->family_member_count,
+            'pln_customer_id' => $record->pln_customer_id,
+            'national_decile' => $record->national_decile,
+            'provincial_decile' => $record->provincial_decile,
+            'regency_decile' => $record->regency_decile,
+            'national_pbi' => $record->national_pbi,
+            'local_pbi' => $record->local_pbi,
             'occupation' => $record->occupation,
             'income' => $record->income_range,
             'house_ownership' => $record->house_ownership,
@@ -23,6 +32,13 @@
             'ventilation' => $record->ventilation_availability,
             'mck' => $record->mck_availability,
             'water_source' => $record->water_source,
+            'electricity_source' => $record->electricity_source,
+            'electricity_capacity' => $record->electricity_capacity,
+            'cooking_fuel' => $record->cooking_fuel,
+            'toilet_facility' => $record->toilet_facility,
+            'toilet_type' => $record->toilet_type,
+            'sewage_disposal' => $record->sewage_disposal,
+            'floor_type' => $record->floor_type,
             'wall_type' => $record->wall_type,
             'roof_material' => $record->roof_material,
             'roof' => $record->roof_damage_level,
@@ -50,7 +66,7 @@
                 <h1>Pendataan Rumah Tidak Layak Huni</h1>
                 <p>Informasi lokasi dan kondisi Rumah Tidak Layak Huni di Provinsi Maluku.</p>
             </div>
-            <a href="#peta-rlth" class="btn btn-light fw-bold"><i class="fas fa-map-marked-alt me-2"></i>Lihat Peta</a>
+            <div class="d-flex flex-wrap gap-2"><a href="#peta-rlth" class="btn btn-light fw-bold"><i class="fas fa-map-marked-alt me-2"></i>Lihat Peta</a><a href="/form-pendataan-rtlh" class="btn btn-outline-light fw-bold"><i class="fas fa-clipboard-list me-2"></i>Isi Pendataan RTLH</a></div>
         </section>
 
         <div class="row g-3 my-4">
@@ -121,11 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const fieldHtml = group('Identitas Pendataan', 'fa-id-card', [
             ['Tahun pendataan',record.year], ['NIK',record.national_id], ['Nomor KK',record.family_card_number], ['Nomor telepon',record.phone],
         ]) + group('Alamat dan Koordinat', 'fa-map-location-dot', [
-            ['Alamat',record.address], ['Desa / Kelurahan',record.village], ['Kabupaten / Kota',record.regency], ['Koordinat',record.latitude && record.longitude ? `${record.latitude}, ${record.longitude}` : null],
+            ['Alamat',record.address], ['Desa / Kelurahan',record.village], ['Kecamatan',record.district], ['Kabupaten / Kota',record.regency], ['Provinsi',record.province], ['Koordinat',record.latitude && record.longitude ? `${record.latitude}, ${record.longitude}` : null],
         ]) + group('Sosial dan Kepemilikan', 'fa-people-roof', [
-            ['Pekerjaan',record.occupation], ['Penghasilan',record.income], ['Status rumah',record.house_ownership], ['Status tanah',record.land_ownership], ['Aset lainnya',record.other_assets],
+            ['Pekerjaan',record.occupation], ['Penghasilan',record.income], ['Anggota keluarga',record.family_members], ['ID pelanggan PLN',record.pln_customer_id], ['Desil nasional',record.national_decile], ['Desil provinsi',record.provincial_decile], ['Desil kabupaten/kota',record.regency_decile], ['PBI nasional',record.national_pbi], ['PBI Pemda',record.local_pbi], ['Status rumah',record.house_ownership], ['Status tanah',record.land_ownership], ['Aset lainnya',record.other_assets],
         ]) + group('Kondisi Bangunan', 'fa-house-chimney-crack', [
-            ['Kondisi pondasi',record.foundation], ['Balok / kolom',record.beam_column], ['Dinding',record.wall_type], ['Atap',record.roof_material], ['Tingkat kerusakan atap',record.roof], ['Luas bangunan',record.area ? `${record.area} m²` : null], ['Jendela',record.windows], ['Ventilasi',record.ventilation], ['MCK',record.mck], ['Sumber air bersih',record.water_source],
+            ['Kondisi pondasi',record.foundation], ['Balok / kolom',record.beam_column], ['Jenis lantai',record.floor_type], ['Dinding',record.wall_type], ['Atap',record.roof_material], ['Tingkat kerusakan atap',record.roof], ['Luas bangunan',record.area ? `${record.area} m²` : null], ['Jendela',record.windows], ['Ventilasi',record.ventilation], ['MCK',record.mck],
+        ]) + group('Utilitas Rumah', 'fa-faucet-drip', [
+            ['Sumber air minum',record.water_source], ['Sumber penerangan',record.electricity_source], ['Daya terpasang',record.electricity_capacity], ['Bahan bakar memasak',record.cooking_fuel], ['Fasilitas BAB',record.toilet_facility], ['Jenis kloset',record.toilet_type], ['Pembuangan akhir tinja',record.sewage_disposal],
         ]);
         const photos = Object.entries(record.photos || {}).map(([label,url]) => `<a class="rlth-detail-photo" href="${escapeHtml(url)}" target="_blank" rel="noopener"><small>${escapeHtml(label)}</small><img src="${escapeHtml(url)}" alt="${escapeHtml(label)} - ${escapeHtml(record.name)}"></a>`).join('') || '<p class="text-secondary mb-0">Belum ada dokumentasi foto untuk data ini.</p>';
         document.querySelector('#rlthDetailBody').innerHTML = `<section class="rlth-detail-heading"><h3>${value(record.name)}</h3><p><i class="fas fa-location-dot me-2"></i>${value([record.village,record.regency].filter(Boolean).join(', '))}</p></section>${fieldHtml}<h4 class="rlth-detail-section-title"><i class="fas fa-images me-2"></i>Dokumentasi Rumah</h4><div class="rlth-detail-photos">${photos}</div>`;

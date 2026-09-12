@@ -16,12 +16,15 @@ use App\Http\Controllers\ServiceReviewController;
 use App\Http\Controllers\PkpServiceController;
 use App\Http\Controllers\RlthRecordController;
 use App\Http\Controllers\ProposalDataController;
+use App\Http\Controllers\PublicRlthSubmissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [FrontendController::class, 'page']);
 Route::post('/ulasan', [FrontendController::class, 'storeReview'])->name('reviews.store');
 Route::get('/geomap-data', [FrontendController::class, 'mapData'])->name('geomap.data');
 Route::get('/berita/{slug}', [FrontendController::class, 'newsDetail'])->where('slug', '[a-z0-9-]+');
+Route::get('/form-pendataan-rtlh', [PublicRlthSubmissionController::class, 'create'])->name('public.rlth.create');
+Route::post('/form-pendataan-rtlh', [PublicRlthSubmissionController::class, 'store'])->name('public.rlth.store');
 Route::get('/{page}', [FrontendController::class, 'page'])->whereIn('page', ['profil-dinas','visi-misi','tugas-pokok-fungsi','struktur-organisasi','profil-pejabat','agenda-kegiatan','program-kegiatan','layanan-pkp','pendataan-rlth','data-usulan','sadata-kp','sadata-psu','kawasan-kumuh','berita','geomap','galeri','peraturan','informasi','unduhan','kontak']);
 Route::get('/console/login', [ConsoleController::class, 'login']);
 Route::post('/console/login', [ConsoleController::class, 'auth']);
@@ -35,6 +38,7 @@ Route::middleware('console.auth')->prefix('console')->group(function () {
     Route::get('/pendataan-rlth/template', [RlthRecordController::class, 'template']);
     Route::post('/pendataan-rlth', [RlthRecordController::class, 'store']);
     Route::post('/pendataan-rlth/import', [RlthRecordController::class, 'import']);
+    Route::patch('/pendataan-rlth/{record}/status', [RlthRecordController::class, 'updateStatus']);
     Route::put('/pendataan-rlth/{record}', [RlthRecordController::class, 'update']);
     Route::delete('/pendataan-rlth/{record}', [RlthRecordController::class, 'destroy']);
     Route::get('/data-usulan', [ProposalDataController::class, 'index']);

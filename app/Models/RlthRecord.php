@@ -12,6 +12,8 @@ class RlthRecord extends Model
         'latitude' => 'float',
         'longitude' => 'float',
         'building_area' => 'decimal:2',
+        'submitted_at' => 'datetime',
+        'consented_at' => 'datetime',
     ];
 
     public function photoUrl(string $column): ?string

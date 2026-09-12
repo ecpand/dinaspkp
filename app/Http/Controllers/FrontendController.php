@@ -71,7 +71,7 @@ class FrontendController extends Controller
             ]);
         }
         if ($page === 'pendataan-rlth') {
-            $allRlth = RlthRecord::query();
+            $allRlth = RlthRecord::query()->where('submission_status', 'verified');
             $filteredRlth = (clone $allRlth)->latest()->get();
             return view('frontend.pages.services.rlth', $data + [
                 'title' => 'Pendataan RLTH',
@@ -90,12 +90,18 @@ class FrontendController extends Controller
                         'family_card_number' => $record->family_card_number ? str_repeat('*', max(0, strlen($record->family_card_number) - 4)).substr($record->family_card_number, -4) : null,
                         'phone' => $record->phone ? str_repeat('*', max(0, strlen($record->phone) - 4)).substr($record->phone, -4) : null,
                         'address' => $record->address, 'village' => $record->village_name,
-                        'regency' => $record->regency_name, 'occupation' => $record->occupation, 'income' => $record->income_range,
+                        'province' => $record->province_name, 'district' => $record->district_name, 'regency' => $record->regency_name,
+                        'family_members' => $record->family_member_count, 'pln_customer_id' => $record->pln_customer_id,
+                        'national_decile' => $record->national_decile, 'provincial_decile' => $record->provincial_decile, 'regency_decile' => $record->regency_decile,
+                        'national_pbi' => $record->national_pbi, 'local_pbi' => $record->local_pbi,
+                        'occupation' => $record->occupation, 'income' => $record->income_range,
                         'house_ownership' => $record->house_ownership, 'land_ownership' => $record->land_ownership,
                         'other_assets' => $record->other_assets, 'foundation' => $record->foundation_condition,
                         'beam_column' => $record->beam_column_condition, 'windows' => $record->window_availability,
                         'ventilation' => $record->ventilation_availability, 'mck' => $record->mck_availability,
-                        'water_source' => $record->water_source, 'wall_type' => $record->wall_type,
+                        'water_source' => $record->water_source, 'electricity_source' => $record->electricity_source, 'electricity_capacity' => $record->electricity_capacity,
+                        'cooking_fuel' => $record->cooking_fuel, 'toilet_facility' => $record->toilet_facility, 'toilet_type' => $record->toilet_type, 'sewage_disposal' => $record->sewage_disposal,
+                        'floor_type' => $record->floor_type, 'wall_type' => $record->wall_type,
                         'roof_material' => $record->roof_material, 'roof' => $record->roof_damage_level,
                         'area' => $record->building_area, 'latitude' => $record->latitude, 'longitude' => $record->longitude,
                         'photos' => array_filter([
