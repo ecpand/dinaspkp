@@ -16,6 +16,7 @@ use App\Http\Controllers\ServiceReviewController;
 use App\Http\Controllers\PkpServiceController;
 use App\Http\Controllers\RlthRecordController;
 use App\Http\Controllers\ProposalDataController;
+use App\Http\Controllers\RelatedInstitutionController;
 use App\Http\Controllers\PublicRlthSubmissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,10 @@ Route::middleware('console.auth')->prefix('console')->group(function () {
     Route::post('/data-usulan', [ProposalDataController::class, 'store']);
     Route::put('/data-usulan/{proposal}', [ProposalDataController::class, 'update']);
     Route::delete('/data-usulan/{proposal}', [ProposalDataController::class, 'destroy']);
+    Route::get('/instansi-terkait', [RelatedInstitutionController::class, 'index']);
+    Route::post('/instansi-terkait', [RelatedInstitutionController::class, 'store']);
+    Route::put('/instansi-terkait/{institution}', [RelatedInstitutionController::class, 'update']);
+    Route::delete('/instansi-terkait/{institution}', [RelatedInstitutionController::class, 'destroy']);
     Route::get('/ulasan-layanan', [ServiceReviewController::class, 'index']);
     Route::delete('/ulasan-layanan/{review}', [ServiceReviewController::class, 'destroy']);
     Route::get('/agenda', [AgendaController::class, 'index']);

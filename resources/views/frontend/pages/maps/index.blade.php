@@ -77,8 +77,8 @@
 <main class="geomap-page">
     <div class="container">
         <header>
-            <h1 class="geomap-title"><i class="fas fa-map-marked-alt me-2 text-primary"></i>SIGAProgram PKP Provinsi Maluku</h1>
-            <p class="geomap-intro">System Informasi Geospasial Program Perumahan Dan Kawasan Permukiman.</p>
+            <h1 class="geomap-title"><i class="fas fa-map-marked-alt me-2 text-primary"></i>{{ $mapTitle ?? 'Sadata Sebaran Kegiatan' }}</h1>
+            <p class="geomap-intro">{{ $mapIntro ?? 'Peta sebaran pembangunan perumahan, kawasan permukiman, dan PSU Provinsi Maluku.' }}</p>
         </header>
         <section class="geomap-shell">
             <div>
@@ -86,6 +86,12 @@
                     <select id="regency" class="form-select" aria-label="Filter kabupaten atau kota"><option value="">Filter Kabupaten / Kota</option>@foreach($regencies as $regency)<option value="{{ $regency->id }}">{{ str_contains(strtolower($regency->name), 'aru') ? 'Kabupaten ' : '' }}{{ $regency->name }}</option>@endforeach</select>
                     <select id="village" class="form-select"><option value="">Semua Desa</option>@foreach($villages as $village)<option value="{{ $village->id }}" data-regency="{{ $village->regency_id }}">{{ $village->name }}</option>@endforeach</select>
                     <select id="programType" class="form-select"><option value="">Semua Program</option>@foreach($programTypes as $type)<option value="{{ $type->id }}">{{ $type->name }}</option>@endforeach</select>
+                    <select id="workCategory" class="form-select"><option value="">Semua Kategori</option><option value="swakelola">Swakelola</option><option value="kontraktual">Kontraktual</option></select>
+                    @if(($mapScope ?? '') === 'slum-area')
+                        <select id="areaStatus" class="form-select" disabled><option value="kawasan_kumuh" selected>Kawasan Kumuh</option></select>
+                    @else
+                        <select id="areaStatus" class="form-select"><option value="">Semua Status Kawasan</option><option value="kawasan_kumuh">Kawasan Kumuh</option><option value="bukan_kawasan_kumuh">Bukan Kawasan Kumuh</option></select>
+                    @endif
                     @php($areaGroups = $mapAreas->groupBy(fn ($area) => str_contains($area->name, ' — ') ? explode(' — ', $area->name, 2)[0] : 'Kabupaten / Kota'))
                     <select id="area" class="form-select" aria-label="Filter wilayah GeoJSON" disabled>
                         <option value="">Pilih Kabupaten terlebih dahulu</option>
@@ -111,7 +117,7 @@
                 <div class="map-legend"><span><i class="fas fa-circle" style="color:#2166c2"></i>Pembangunan Perumahan</span><span><i class="fas fa-circle" style="color:#099579"></i>Kawasan Permukiman</span><span><i class="fas fa-circle" style="color:#7d4edb"></i>Peningkatan PSU</span><span><i class="fas fa-square" style="color:#ee7a34"></i>Wilayah / Kawasan</span></div>
             </div>
             <aside class="geomap-side">
-                <div class="side-heading"><h2><i class="fas fa-layer-group me-2"></i>DAFTAR DATA PENERIMA</h2><span id="totalCount" class="side-count">Memuat data...</span></div>
+                <div class="side-heading"><h2><i class="fas fa-layer-group me-2"></i>{{ $mapListTitle ?? 'DAFTAR DATA PENERIMA' }}</h2><span id="totalCount" class="side-count">Memuat data...</span></div>
                 <div class="map-stats"><div class="map-stat"><strong id="statTotal">0</strong><small>TOTAL PENERIMA</small></div><div class="map-stat"><strong id="statDone">0</strong><small>SELESAI</small></div><div class="map-stat"><strong id="statProcess">0</strong><small>PROSES</small></div><div class="map-stat"><strong id="statWaiting">0</strong><small>MENUNGGU</small></div></div>
                 <div id="recipientTree" class="recipient-tree"></div>
             </aside>
@@ -123,6 +129,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    const mapScope = @json($mapScope ?? '');
     const map = L.map('mbbrMap').setView([-3.7, 128.1], 7);
     const tileUrls = { default: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', terrain: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', hybrid: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' };
     let baseLayer = L.tileLayer(tileUrls.default, { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
@@ -134,8 +141,16 @@
 
     function detailDialog(p) {
         const progress = Math.max(0, Math.min(100, Number(p.progress || 0)));
+        const financialProgress = Math.max(0, Math.min(100, Number(p.financial_progress || 0)));
+        const isContractual = p.work_category === 'kontraktual';
+        const areaStatus = p.area_status === 'kawasan_kumuh' ? 'Kawasan Kumuh' : (p.area_status === 'bukan_kawasan_kumuh' ? 'Bukan Kawasan Kumuh' : 'Belum diisi');
         const photo = (label, url) => `<div class="photo-box"><small>${label}</small>${url ? `<a href="${esc(url)}" target="_blank"><img src="${esc(url)}" alt="${label}"></a>` : '<div class="no-photo">No Foto</div>'}</div>`;
-        byId('dialogContent').innerHTML = `<div class="dialog-top"><h3>${esc(p.name)}</h3><p>${esc(p.program_type)} &bull; ${esc(p.year || '-')}</p></div><div class="dialog-body"><div class="dialog-grid"><div class="dialog-field"><label>Program</label><span>${esc(p.program)}</span></div><div class="dialog-field"><label>Status</label><span>${esc(p.status)}</span></div><div class="dialog-field"><label>Lokasi</label><span>${esc(p.village)}, ${esc(p.regency)}</span></div><div class="dialog-field"><label>Pelaksana</label><span>${esc(p.provider)}</span></div><div class="dialog-field"><label>Kondisi Rumah</label><span>${esc(p.condition)}</span></div><div class="dialog-field"><label>Decile</label><span>${esc(p.decile)}</span></div><div class="dialog-field"><label>Bantuan Material</label><span>${money(p.material_cost)}</span></div><div class="dialog-field"><label>Bantuan Upah</label><span>${money(p.labor_cost)}</span></div></div><div class="progress-box"><div class="d-flex justify-content-between mb-1"><strong class="small">Progres Pekerjaan</strong><strong class="small text-primary">${progress}%</strong></div><div class="progress-line"><i style="width:${progress}%"></i></div></div><h4 class="photos-title">Dokumentasi Penerima</h4><div class="photo-grid">${photo('Foto Awal', p.photo_initial)}${photo('Foto Progres', p.photo_progress)}</div></div>`;
+        const field = (label, value) => `<div class="dialog-field"><label>${label}</label><span>${esc(value)}</span></div>`;
+        const implementation = isContractual
+            ? field('Lokasi Kegiatan', p.activity_location) + field('PPK', p.ppk) + field('PPTK', p.pptk) + field('Nomor Kontrak', p.contract_number) + field('Tanggal Kontrak', p.contract_date) + field('Kontraktor', p.contractor) + field('Nilai Kontrak', money(p.contract_value)) + field('Volume Pekerjaan', `${p.work_volume || '-'} ${p.work_unit || ''}`)
+            : field('Nama Pendamping', p.companion) + field('Penyedia Barang', p.provider) + field('Kondisi Rumah', p.condition) + field('Desil', p.decile) + field('Biaya Material', money(p.material_cost)) + field('Biaya Upah', money(p.labor_cost));
+        const financial = isContractual ? `<div class="progress-box"><div class="d-flex justify-content-between mb-1"><strong class="small">Progres Keuangan</strong><strong class="small text-primary">${financialProgress}%</strong></div><div class="progress-line"><i style="width:${financialProgress}%"></i></div></div>` : '';
+        byId('dialogContent').innerHTML = `<div class="dialog-top"><h3>${esc(p.name)}</h3><p>${esc(p.program_type)} &bull; ${esc(p.year || '-')}</p></div><div class="dialog-body"><div class="dialog-grid">${field('Sub Program', p.program)}${field('Kategori Pekerjaan', isContractual ? 'Kontraktual' : 'Swakelola')}${field('Status Kawasan', areaStatus)}${field('Status Pelaksanaan', p.status)}${field('Wilayah', `${p.village || '-'}, ${p.regency || '-'}`)}${implementation}</div><div class="progress-box"><div class="d-flex justify-content-between mb-1"><strong class="small">Progres Fisik</strong><strong class="small text-primary">${progress}%</strong></div><div class="progress-line"><i style="width:${progress}%"></i></div></div>${financial}<h4 class="photos-title">Dokumentasi Penerima</h4><div class="photo-grid">${photo('Foto Awal', p.photo_initial)}${photo('Foto Progres', p.photo_progress)}</div></div>`;
         byId('recipientDialog').classList.add('show');
         byId('recipientDialog').setAttribute('aria-hidden', 'false');
     }
@@ -143,7 +158,7 @@
     byId('dialogClose').onclick = closeDialog;
     byId('recipientDialog').onclick = event => { if (event.target === byId('recipientDialog')) closeDialog(); };
 
-    function pointPopup(p) { return `<div class="geo-popup-title">${esc(p.name)}</div><div class="geo-popup-meta"><b>${esc(p.program_type)}</b><br>${esc(p.village)}, ${esc(p.regency)}<br>Status: ${esc(p.status)} &bull; Progres: ${esc(p.progress)}%</div><button class="geo-popup-link" onclick="openRecipientDetail(${Number(p.id)})">Lihat detail penerima <i class="fas fa-arrow-right"></i></button>`; }
+    function pointPopup(p) { const category = p.work_category === 'kontraktual' ? 'Kontraktual' : 'Swakelola'; const area = p.area_status === 'kawasan_kumuh' ? 'Kawasan Kumuh' : (p.area_status === 'bukan_kawasan_kumuh' ? 'Bukan Kumuh' : 'Belum diisi'); return `<div class="geo-popup-title">${esc(p.name)}</div><div class="geo-popup-meta"><b>${esc(p.program_type)}</b><br>${esc(p.village)}, ${esc(p.regency)}<br>${category} &bull; ${area}<br>Status: ${esc(p.status)} &bull; Progres: ${esc(p.progress)}%</div><button class="geo-popup-link" onclick="openRecipientDetail(${Number(p.id)})">Lihat detail <i class="fas fa-arrow-right"></i></button>`; }
     window.openRecipientDetail = id => { const feature = allPoints.find(item => Number(item.properties.id) === Number(id)); if (feature) detailDialog(feature.properties); };
 
     function renderTree() {
@@ -198,7 +213,7 @@
     }
     async function loadData() {
         const selectedArea = byId('area').selectedOptions[0];
-        const query = new URLSearchParams({ regency_id: byId('regency').value, village_id: byId('village').value, program_type_id: byId('programType').value, area_id: selectedArea?.dataset.group ? '' : byId('area').value, area_group: selectedArea?.dataset.group || '' });
+        const query = new URLSearchParams({ regency_id: byId('regency').value, village_id: byId('village').value, program_type_id: byId('programType').value, work_category: byId('workCategory').value, area_status: byId('areaStatus').value, scope: mapScope, area_id: selectedArea?.dataset.group ? '' : byId('area').value, area_group: selectedArea?.dataset.group || '' });
         const response = await fetch(`/geomap-data?${query}`); drawMap(await response.json());
     }
     function updateAreaOptions() {
@@ -222,7 +237,7 @@
         updateAreaOptions();
         loadData();
     };
-    byId('village').onchange = loadData; byId('programType').onchange = loadData;
+    byId('village').onchange = loadData; byId('programType').onchange = loadData; byId('workCategory').onchange = loadData; byId('areaStatus').onchange = loadData;
     byId('area').onchange = () => {
         const selected = byId('area').selectedOptions[0];
         const chip = byId('areaColorChip');

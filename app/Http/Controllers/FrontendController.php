@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\{Agenda,Document,Gallery,MbbrArea,MbbrProgram,MbbrRecipient,MbbrProgramType,PkpService,Post,ProposalData,ProvincialLeader,Regency,RlthRecord,ServiceReview,StructuralOfficial,VisitorSession,WebsiteSetting,WelcomeSlide,Village};
+use App\Models\{Agenda,Document,Gallery,MbbrArea,MbbrProgram,MbbrRecipient,MbbrProgramType,PkpService,Post,ProposalData,ProvincialLeader,RelatedInstitution,Regency,RlthRecord,ServiceReview,StructuralOfficial,VisitorSession,WebsiteSetting,WelcomeSlide,Village};
 use Illuminate\Http\Request;
 
 class FrontendController extends Controller
@@ -11,7 +11,7 @@ class FrontendController extends Controller
         if ($page === 'home') $this->recordVisit($request);
         $reviews = ServiceReview::selectRaw('rating, count(*) as total')->groupBy('rating')->pluck('total', 'rating');
         $total = $reviews->sum();
-        $data = ['page'=>$page,'setting'=>WebsiteSetting::first(),'leaders'=>ProvincialLeader::where('is_active',true)->orderBy('sort_order')->get(),'welcomeSlides'=>WelcomeSlide::where('is_active',true)->orderBy('sort_order')->get(),'headOfficial'=>StructuralOfficial::where('is_active',true)->where('position','like','%Kepala Dinas%')->orderBy('sort_order')->first() ?? StructuralOfficial::where('is_active',true)->orderBy('sort_order')->first(),'agendas'=>Agenda::whereIn('status',['scheduled','ongoing'])->orderBy('start_date')->limit(4)->get(),'programs'=>MbbrProgram::with('type')->latest()->limit(6)->get(),'programCount'=>MbbrProgram::count(),'recipientCount'=>MbbrRecipient::count(),'posts'=>Post::where('status','published')->whereNotNull('published_at')->latest('published_at')->limit(4)->get(),'officials'=>StructuralOfficial::where('is_active',true)->orderBy('sort_order')->get(),'documents'=>Document::latest()->get(),'galleries'=>Gallery::where('is_active',true)->latest()->limit(6)->get(),'regencies'=>Regency::orderBy('name')->get(),'reviews'=>$reviews,'reviewTotal'=>$total,'reviewAverage'=>$total?round(ServiceReview::avg('rating'),1):0,'visitorToday'=>VisitorSession::whereDate('visit_date',today())->count(),'visitorMonth'=>VisitorSession::whereBetween('visit_date',[today()->startOfMonth(),today()->endOfMonth()])->count(),'visitorTotal'=>VisitorSession::count()];
+        $data = ['page'=>$page,'setting'=>WebsiteSetting::first(),'leaders'=>ProvincialLeader::where('is_active',true)->orderBy('sort_order')->get(),'welcomeSlides'=>WelcomeSlide::where('is_active',true)->orderBy('sort_order')->get(),'headOfficial'=>StructuralOfficial::where('is_active',true)->where('position','like','%Kepala Dinas%')->orderBy('sort_order')->first() ?? StructuralOfficial::where('is_active',true)->orderBy('sort_order')->first(),'agendas'=>Agenda::whereIn('status',['scheduled','ongoing'])->orderBy('start_date')->limit(4)->get(),'programs'=>MbbrProgram::with('type')->latest()->limit(6)->get(),'programCount'=>MbbrProgram::count(),'recipientCount'=>MbbrRecipient::count(),'posts'=>Post::where('status','published')->whereNotNull('published_at')->latest('published_at')->limit(4)->get(),'officials'=>StructuralOfficial::where('is_active',true)->orderBy('sort_order')->get(),'documents'=>Document::latest()->get(),'galleries'=>Gallery::where('is_active',true)->latest()->limit(6)->get(),'relatedInstitutions'=>RelatedInstitution::where('is_active',true)->orderBy('sort_order')->orderBy('name')->get(),'regencies'=>Regency::orderBy('name')->get(),'reviews'=>$reviews,'reviewTotal'=>$total,'reviewAverage'=>$total?round(ServiceReview::avg('rating'),1):0,'visitorToday'=>VisitorSession::whereDate('visit_date',today())->count(),'visitorMonth'=>VisitorSession::whereBetween('visit_date',[today()->startOfMonth(),today()->endOfMonth()])->count(),'visitorTotal'=>VisitorSession::count()];
         $data['agendas'] = Agenda::whereIn('status', ['scheduled', 'ongoing'])->orderBy('start_date')->limit(5)->get();
         if ($page === 'profil-dinas') return view('frontend.pages.profile.dinas', $data + ['title' => 'Profil Dinas']);
         if ($page === 'visi-misi') return view('frontend.pages.profile.vision-mission', $data + ['title' => 'Visi Misi']);
@@ -119,6 +119,42 @@ class FrontendController extends Controller
             'programTypes' => MbbrProgramType::orderBy('id')->get(),
             'mapAreas' => MbbrArea::with(['regency', 'village'])->orderBy('name')->get(),
         ]);
+        if ($page === 'sadata-kp') {
+            return view('frontend.pages.maps.index', $data + [
+                'title' => 'Sadata KP',
+                'mapTitle' => 'Sadata Kawasan Permukiman',
+                'mapIntro' => 'Peta sebaran kegiatan Kawasan Permukiman Provinsi Maluku.',
+                'mapScope' => 'kp-waiting',
+                'mapListTitle' => 'DATA KP',
+                'villages' => Village::orderBy('name')->get(),
+                'programTypes' => MbbrProgramType::whereIn('code', ['KP', 'KAWASAN_PERMUKIMAN'])->orderBy('id')->get(),
+                'mapAreas' => MbbrArea::with(['regency', 'village'])->orderBy('name')->get(),
+            ]);
+        }
+        if ($page === 'sadata-psu') {
+            return view('frontend.pages.maps.index', $data + [
+                'title' => 'Sadata PSU',
+                'mapTitle' => 'Sadata Prasarana, Sarana dan Utilitas',
+                'mapIntro' => 'Peta sebaran kegiatan Prasarana, Sarana dan Utilitas Provinsi Maluku.',
+                'mapScope' => 'psu-waiting',
+                'mapListTitle' => 'DATA PSU',
+                'villages' => Village::orderBy('name')->get(),
+                'programTypes' => MbbrProgramType::whereIn('code', ['PSU', 'PENINGKATAN_PSU'])->orderBy('id')->get(),
+                'mapAreas' => MbbrArea::with(['regency', 'village'])->orderBy('name')->get(),
+            ]);
+        }
+        if ($page === 'kawasan-kumuh') {
+            return view('frontend.pages.maps.index', $data + [
+                'title' => 'Kawasan Kumuh',
+                'mapTitle' => 'Sadata Kawasan Kumuh',
+                'mapIntro' => 'Peta sebaran kegiatan pada kawasan kumuh Provinsi Maluku.',
+                'mapScope' => 'slum-area',
+                'mapListTitle' => 'DATA KAWASAN KUMUH',
+                'villages' => Village::orderBy('name')->get(),
+                'programTypes' => MbbrProgramType::orderBy('id')->get(),
+                'mapAreas' => MbbrArea::with(['regency', 'village'])->orderBy('name')->get(),
+            ]);
+        }
         if ($page === 'data-usulan') {
             $proposals = ProposalData::query()->latest()->get();
             return view('frontend.pages.sigaprumabeta.proposals', $data + [
@@ -131,15 +167,6 @@ class FrontendController extends Controller
                     'year' => $proposal->proposal_year, 'regency' => $proposal->regency_name, 'village' => $proposal->village_name,
                 ])->values(),
             ]);
-        }
-        if (in_array($page, ['sadata-kp', 'sadata-psu', 'kawasan-kumuh'], true)) {
-            $sigaprumabetaPages = [
-                'data-usulan' => ['title' => 'Data Usulan', 'icon' => 'fa-file-circle-plus', 'description' => 'Pusat informasi usulan pembangunan perumahan dan kawasan permukiman Provinsi Maluku.'],
-                'sadata-kp' => ['title' => 'Sadata KP', 'icon' => 'fa-city', 'description' => 'Sistem data kawasan permukiman untuk mendukung perencanaan dan pengambilan kebijakan.'],
-                'sadata-psu' => ['title' => 'Sadata PSU', 'icon' => 'fa-road', 'description' => 'Sistem data prasarana, sarana, dan utilitas umum perumahan dan permukiman.'],
-                'kawasan-kumuh' => ['title' => 'Kawasan Kumuh', 'icon' => 'fa-layer-group', 'description' => 'Informasi kawasan kumuh untuk mendukung penanganan permukiman yang layak dan berkelanjutan.'],
-            ];
-            return view('frontend.pages.sigaprumabeta.index', $data + ['sigaprumabeta' => $sigaprumabetaPages[$page]]);
         }
         if ($page === 'galeri') {
             $galleryItems = Gallery::where('is_active', true)->latest()->get();
@@ -185,14 +212,39 @@ class FrontendController extends Controller
         $groupRegencyId = $groupRegencyIds->count() === 1 ? $groupRegencyIds->first() : null;
         $regencyId = $request->integer('regency_id') ?: $selectedArea?->regency_id ?: $groupRegencyId;
         $villageId = $request->integer('village_id') ?: $selectedArea?->village_id;
-        $recipients = MbbrRecipient::with(['program.type','regency','village'])->whereNotNull('latitude')->whereNotNull('longitude')->when($regencyId,fn($q,$id)=>$q->where('regency_id',$id))->when($villageId,fn($q,$id)=>$q->where('village_id',$id))->when($request->program_type_id,fn($q,$id)=>$q->whereHas('program',fn($program)=>$program->where('mbbr_program_type_id',$id)))->get();
+        $recipients = MbbrRecipient::with(['program.type','regency','village'])
+            ->whereNotNull('latitude')->whereNotNull('longitude')
+            ->when($regencyId, fn ($q, $id) => $q->where('regency_id', $id))
+            ->when($villageId, fn ($q, $id) => $q->where('village_id', $id))
+            ->when($request->program_type_id, fn ($q, $id) => $q->whereHas('program', fn ($program) => $program->where('mbbr_program_type_id', $id)))
+            ->when($request->filled('work_category'), fn ($q) => $q->where('work_category', $request->string('work_category')))
+            ->when($request->filled('area_status'), fn ($q) => $q->where('area_status', $request->string('area_status')))
+            ->when($request->string('scope')->toString() === 'kp-waiting', fn ($q) => $q->where('status', 'waiting')->whereHas('program.type', fn ($type) => $type->whereIn('code', ['KP', 'KAWASAN_PERMUKIMAN'])))
+            ->when($request->string('scope')->toString() === 'psu-waiting', fn ($q) => $q->where('status', 'waiting')->whereHas('program.type', fn ($type) => $type->whereIn('code', ['PSU', 'PENINGKATAN_PSU'])))
+            ->when($request->string('scope')->toString() === 'slum-area', fn ($q) => $q->where('area_status', 'kawasan_kumuh'))
+            ->get();
         $areas = MbbrArea::with(['regency','village','program'])
             ->when($selectedArea, fn($q) => $q->whereKey($selectedArea->id))
             ->when(!$selectedArea && $areaGroup !== '', fn($q) => $q->where('name', 'like', $areaGroup.' —%'))
             ->when(!$selectedArea && $areaGroup === '' && $regencyId, fn ($query) => $query->where('regency_id', $regencyId))
             ->when(!$selectedArea && $areaGroup === '' && $villageId, fn ($query) => $query->where('village_id', $villageId))
             ->get();
-        $points = $recipients->map(fn($recipient)=>['type'=>'Feature','geometry'=>['type'=>'Point','coordinates'=>[(float)$recipient->longitude,(float)$recipient->latitude]],'properties'=>['feature_type'=>'recipient','id'=>$recipient->id,'name'=>$recipient->name,'program'=>$recipient->program?->name,'year'=>$recipient->program?->fiscal_year,'program_type'=>$recipient->program?->type?->name,'program_type_id'=>$recipient->program?->mbbr_program_type_id,'regency'=>$recipient->regency?->name,'village'=>$recipient->village?->name,'status'=>$recipient->status,'progress'=>(float)$recipient->progress,'companion'=>$recipient->companion_name,'condition'=>$recipient->condition,'provider'=>$recipient->provider_name,'decile'=>$recipient->decile,'material_cost'=>(float)$recipient->material_cost,'labor_cost'=>(float)$recipient->labor_cost,'photo_initial'=>$recipient->photo_initial_path ? asset('storage/'.$recipient->photo_initial_path) : null,'photo_progress'=>$recipient->photo_progress_path ? asset('storage/'.$recipient->photo_progress_path) : null]]);
+        $points = $recipients->map(fn ($recipient) => ['type' => 'Feature', 'geometry' => ['type' => 'Point', 'coordinates' => [(float) $recipient->longitude, (float) $recipient->latitude]], 'properties' => [
+            'feature_type' => 'recipient', 'id' => $recipient->id, 'name' => $recipient->name,
+            'program' => $recipient->program?->name, 'year' => $recipient->program?->fiscal_year,
+            'program_type' => $recipient->program?->type?->name, 'program_type_id' => $recipient->program?->mbbr_program_type_id,
+            'work_category' => $recipient->work_category, 'area_status' => $recipient->area_status,
+            'regency' => $recipient->regency?->name, 'village' => $recipient->village?->name, 'status' => $recipient->status,
+            'progress' => (float) $recipient->progress, 'financial_progress' => (float) $recipient->financial_progress,
+            'companion' => $recipient->companion_name, 'condition' => $recipient->condition, 'provider' => $recipient->provider_name,
+            'decile' => $recipient->decile, 'material_cost' => (float) $recipient->material_cost, 'labor_cost' => (float) $recipient->labor_cost,
+            'activity_location' => $recipient->activity_location_name, 'ppk' => $recipient->ppk_name, 'pptk' => $recipient->pptk_name,
+            'contract_number' => $recipient->contract_number, 'contract_date' => $recipient->contract_date?->format('Y-m-d'),
+            'contractor' => $recipient->contractor_name, 'contract_value' => (float) $recipient->contract_value,
+            'work_volume' => $recipient->work_volume, 'work_unit' => $recipient->work_unit,
+            'photo_initial' => $recipient->photo_initial_path ? asset('storage/'.$recipient->photo_initial_path) : null,
+            'photo_progress' => $recipient->photo_progress_path ? asset('storage/'.$recipient->photo_progress_path) : null,
+        ]]);
         $palette=['#2563eb','#10b981','#8b5cf6','#f59e0b','#e11d48','#0891b2','#4f46e5','#65a30d','#c2410c','#0f766e','#7c3aed'];
         $areas = $areas->values()->map(function ($area, $index) use (&$palette) {
             if ($area->color) $palette[$index % count($palette)] = $area->color;

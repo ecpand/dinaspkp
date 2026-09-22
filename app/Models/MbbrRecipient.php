@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MbbrRecipient extends Model
 {
     protected $guarded = [];
-    protected function casts(): array { return ['progress' => 'decimal:2','material_cost'=>'decimal:2','labor_cost'=>'decimal:2','material_progress'=>'decimal:2','labor_progress'=>'decimal:2','material_remaining'=>'decimal:2','labor_remaining'=>'decimal:2']; }
+    protected function casts(): array { return ['progress' => 'decimal:2','material_cost'=>'decimal:2','labor_cost'=>'decimal:2','material_progress'=>'decimal:2','labor_progress'=>'decimal:2','material_remaining'=>'decimal:2','labor_remaining'=>'decimal:2','contract_value'=>'decimal:2','financial_progress'=>'decimal:2','contract_date'=>'date']; }
     public function program() { return $this->belongsTo(MbbrProgram::class, 'mbbr_program_id'); }
     public function regency() { return $this->belongsTo(Regency::class); }
     public function village() { return $this->belongsTo(Village::class); }

@@ -50,6 +50,7 @@ class ProposalDataController extends Controller
     {
         return $request->validate([
             'source_number' => ['nullable', 'integer', 'min:1'],
+            'data_source' => ['required', 'in:provinsi,kab_kota,masyarakat'],
             'proposal_year' => ['required', 'integer', 'min:2000', 'max:2100'],
             'proposal_number' => ['nullable', 'string', 'max:255', 'unique:proposal_data,proposal_number'.($proposal ? ','.$proposal->id : '')],
             'applicant_name' => ['required', 'string', 'max:255'],
